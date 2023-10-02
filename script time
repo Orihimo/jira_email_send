@@ -1,0 +1,31 @@
+import com.atlassian.jira.component.ComponentAccessor
+
+def customFieldManager = ComponentAccessor.getCustomFieldManager()
+def createdDate = issue.created // Дата создания запроса
+def crt = createdDate.time
+def resolutionDate = issue.resolutionDate // Дата закрытия запроса
+def resd = resolutionDate.time
+
+def customFieldName = "Часов прошло"
+
+if (createdDate && resolutionDate) {
+    
+    def calendar = Calendar.getInstance()
+    calendar.setTimeInMillis(crt)
+    def workingMinutes = 0
+    
+    while (calendar.getTimeInMillis() < resd) {
+        // Проверяем, что это рабочий день (пн-вс с 9 до 18)
+        if (calendar.get(Calendar.HOUR_OF_DAY) >= 9 && calendar.get(Calendar.HOUR_OF_DAY) < 18) {
+            workingMinutes++
+        }
+        calendar.add(Calendar.MINUTE, 1)
+    }
+   
+    def hour = (workingMinutes / 60).intValue()
+    def mins = workingMinutes % 60
+        
+    // Устанавливаем значение в текстовое поле
+    def customField = customFieldManager.getCustomFieldObjects(issue).find { it.name == customFieldName }
+    issue.setCustomFieldValue(customField, hour.toString() + " час. " + mins + " мин.")
+}
