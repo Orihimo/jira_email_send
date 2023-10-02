@@ -1,0 +1,100 @@
+1. Номер запроса в JIRA: ${issue.key}
+2. <% 
+def customFieldDateTime = com.atlassian.jira.component.ComponentAccessor.getCustomFieldManager().getCustomFieldObjectByName('Начат колл-центр')
+def customFieldValueDateTime = issue.getCustomFieldValue(customFieldDateTime)
+
+// Проверьте, что значение поля не равно null
+if (customFieldValueDateTime != null) {
+    // Преобразуйте java.sql.Timestamp в строку в нужном формате, например, "yyyy-MM-dd HH:mm:ss"
+    def dateTimeString = customFieldValueDateTime.format("yyyy-MM-dd HH:mm:ss")
+
+    // Выведите полученную строку
+    out << "Старт заявки: $dateTimeString"
+} else {
+    // Если значение поля равно null, выведите сообщение об этом
+    out << "Старт заявки: пусто"
+}
+%>
+3. Заявка закрыта: ${issue.resolutionDate}
+4. Исполнитель:  <% out << issue.assignee?.displayName %>
+5. Координатор: <% out << issue.reporter?.displayName %>
+6. <%
+def commentManager1 = com.atlassian.jira.component.ComponentAccessor.getCommentManager()
+def comments1 = commentManager1.getComments(issue)
+
+// Проверяем, есть ли комментарии
+if (!comments.isEmpty()) {
+    def lastComment = comments.last() // Получаем последний комментарий из списка
+    out << "Комментарий исполнителя: " << lastComment.body
+} else {
+    out << "Нет комментариев для этой задачи."
+}
+%>
+7. <% 
+def customField15 = com.atlassian.jira.component.ComponentAccessor.getCustomFieldManager().getCustomFieldObjectByName('Выявленная проблема')
+def customFieldValue15 = issue.getCustomFieldValue(customField15)
+def customFieldString15 = customFieldValue15?.toString() ?: ""
+def wprint = customFieldString15.replace("[null:", "");
+def wprint1 = wprint.replace("1:", "");
+def wprint2 = wprint1.replace("]", "");
+def wprint3 = wprint2.replace(",", " =");
+def wprint4 = wprint2.getClass()
+out << "Выявленная проблема: $wprint3"
+%>    
+8. <%
+def customField = com.atlassian.jira.component.ComponentAccessor.getCustomFieldManager().getCustomFieldObjectByName('Доп. проблемы')
+def customFieldValue = issue.getCustomFieldValue(customField)
+
+if (customFieldValue instanceof List) {
+    // Если значение - это список
+    if (customFieldValue.isEmpty()) {
+        out << "Доп.проблемы: Не обнаружено"
+    } else {
+        def customFieldValueString = customFieldValue.join(', ')
+        out << "Доп.проблемы: " + customFieldValueString
+    }
+} else if (customFieldValue == null) {
+    // Если значение - null
+    out << "Доп.проблемы: Не обнаружено"
+} else {
+    // Если значение - не список и не null
+    out << "Доп.проблемы: " + customFieldValue.toString()
+}
+%>
+9. <%
+def customField11 = com.atlassian.jira.component.ComponentAccessor.getCustomFieldManager().getCustomFieldObjectByName('Номер в Naumen')
+
+if (customField11 != null) {
+    def customFieldValue11 = issue.getCustomFieldValue(customField11)
+
+    if (customFieldValue11 != null) {
+        out << "Номер в Naumen: $customFieldValue11"
+    } else {
+        out << "Поле 'Номер в Naumen:' не заполнено"
+    }
+} else {
+    out << "Номер в Naumen: не найдено"
+}
+%>
+
+
+
+
+
+# Здесь тема письма
+
+<%
+def customField11 = com.atlassian.jira.component.ComponentAccessor.getCustomFieldManager().getCustomFieldObjectByName('Номер в Naumen')
+
+if (customField11 != null) {
+    def customFieldValue11 = issue.getCustomFieldValue(customField11)
+
+    if (customFieldValue11 != null) {
+        out << "$customFieldValue11"
+    } else {
+        out << "Номер не обнаружен"
+    }
+} else {
+    out << "Номер в Naumen: не найдено"
+}
+%>
